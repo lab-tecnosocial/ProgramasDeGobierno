@@ -1,0 +1,236 @@
+---
+title: "El vocabulario del poder I"
+subtitle: "Análisis de contenido de los programas de gobierno de 2020"
+author: "Área de Participación Ciudadana - Lab TecnoSocial"
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
+    theme: flatly
+---
+
+## Introducción
+
+Esta es la primera entrega de la serie de análisis "El vocabulario del poder" realizado por el area de Participación Ciudadana del Laboratorio de Redes y Tecnologías Sociales ([Lab TecnoSocial](http://labtecnosocial.org/)). El objetivo de este primer análisis es develar las palabras clave de las programas de gobierno que conforman la visión de mundo y propuesta de los partidos. 
+
+Realizaremos un análisis de contenido de los textos de los programas de gobierno. Si bien nada supera aún a una lectura atenta, contextualizada y reflexiva de los programas de gobierno, el análisis de contenido nos permitirá crear un resumen del vocabulario básico de las propuestas de los aspirantes a gobernantes, y una rápida comparación entre ellos. 
+
+Dado que siempre se puede usar la retórica en los debates políticos entre candidatos, se hace dificil saber qué es lo que realmente proponen los partidos. Nuestro método aquí es más estandarizado y cuantitativo, pero por lo mismo más objetivo,  lo que nos permite ver cuestiones a veces ocultas entre tanta estética. ¿Qué imagen de Bolivia tienen los candidatos? ¿Sus propuestas son realmente diferentes entre sí, más allá de sus estilos mediáticos personales? ¿Qué de diferente ofrecen entre sí?
+
+Cabe aclarar que nos limitaremos a detallar nuestros procedimientos, ejemplificar la lectura de los mismos y hacer notar algunas tendencias generales. La lectura detallada de los gráficos y los datos, sin embargo, corresponde a los ciudadanos. Más que un trabajo de interpretación, este es un trabajo de extracción (*mining*). También ponemos a disposición la descarga de los conjuntos de datos usados. 
+
+## Preparación de los datos
+
+Partimos de los programas de gobierno públicados por el [Organo Electoral Plurinacional](https://www.oep.org.bo/elecciones-generales-2020/programas-de-gobierno/). A partir de allí preparamos los datos para su posterior análisis:
+
+```{r message = FALSE}
+# Cargamos los 9 programas de gobierno en PDF, los transformamos a texto plano y luego los pasamos a una tabla de datos
+
+library(tidyverse)
+library(pdftools)
+
+programas_pdf <- list.files(path = "./PDFs2020", pattern = "pdf$", full.names = TRUE)
+programas_texto <- map(programas_pdf, pdf_text) 
+partidos <- c("ADN", "CC", "CREEMOS", "FPV", "JUNTOS", "Libre21", "MAS-IPSP", "PAN-BOL")
+programas_df <- tibble(partido = partidos, programa = programas_texto)
+programas_df
+```
+
+[Descarga esta base de datos de 8 x 2 en formato CSV]()
+
+```{r message=FALSE, warning=FALSE}
+# Tokenizamos por palabras, removemos las palabras vacías generales y específicas al corpus, y corregimos algunas cuestiones con tildes
+
+library(tidytext)
+library(stopwords)
+library(stringr)
+
+vac <- c("bolivia", "país", "creemos.org", "a.d.n", "f.p.v","boliviano", "bolivianos", "boliviana", "a", "b", "c", "d")
+vacias_especificas <- tibble(palabra = vac)
+
+programas_palabras <- programas_df %>% 
+  unnest %>% 
+  unnest_tokens(palabra, programa, strip_numeric = TRUE) %>%
+  anti_join(tibble(palabra = stopwords("spanish"))) %>%
+  anti_join(vacias_especificas) %>%
+  mutate(palabra = str_replace_all(palabra, "democratica", "democrática"))
+  
+```
+
+
+## Análisis de datos
+
+### 1. Extensión de los programas de gobierno
+
+Una primera comparación sencilla pero ilustrativa tiene que ver con la extensión de los programas de gobierno en páginas y palabras. Se espera que un documento que detalla el gobierno de todo un país sea lo suficientemente complejo y por tanto con cierta extensión.
+
+```{r}
+programas_df$pag <- c(9, 56, 60, 92, 52, 48, 58, 42) 
+
+programas_df %>%
+  ggplot(aes(reorder(partido, pag), pag)) +
+  geom_col() +
+  coord_flip() +
+  geom_label(aes(label = pag)) +
+  labs(title = "Número de páginas de los programas de gobierno", x = NULL, y = "Número") +
+  theme_minimal()
+median(programas_df$pag)
+
+```
+
+Vemos que la media de los programas de gobierno es 54 páginas. Llama la atención la extensión tan minima de ADN y la mayor ampulosidad del programa del FPV, donde se ha detectado [plagio](https://www.lostiempos.com/actualidad/pais/20200210/fpv-presenta-nuevamente-programa-gobierno-plagiado-partido-peruano).
+
+### 2. Frecuencia de palabras
+
+Naturalmente, la cantidad de páginas no nos dicen mucho sobre el contenido en sí. Ahora vamos a extraer la frecuencia de las palabras más utilizadas.
+
+```{r}
+# Hacemos un conteno de la frecuencia de palabras más usadas por cada partido en sus programas
+freq <- programas_palabras %>%
+  count(partido, palabra, sort = TRUE) %>%
+  arrange(partido)
+freq
+```
+
+[Descarga esta base de datos de 30.910 x 3 en formato CSV]()
+
+```{r message=FALSE}
+# Recortamos las 10 palabras más usadas
+top <- freq %>%
+  group_by(partido) %>%
+  top_n(10) %>%
+  arrange(partido)
+top
+```
+
+[Descarga esta base de datos de 80 x 3 en formato CSV]()
+
+La anterior tabla ya nos da la información que queremos, pero sería mejor visualizarla de una forma que nos ayude a comparar las palabras más frecuentes de los distintos programas. Una opción popular aquí es el uso de *nubes de palabras*, que si bien tienen una forma atractiva, en realidad no resumen bien la información, pues (a) no se puede distinguir la magnitud de la frecuencia de palabras de una palabra frente a las otras y (b) es dificil comparar varias nubes de palabras, para nuestro caso ocho.  
+
+En su lugar usaremos un diagrama de barras que es más preciso y comparable.
+
+```{r, fig.height=4, fig.width=4, message=FALSE, warning=FALSE}
+# Gráficamos
+ggplot(top, aes(x = reorder_within(palabra, n, partido), y = n, fill = partido)) +
+  geom_col(show.legend = F) +
+  facet_wrap(~partido, scales = "free_y", ncol = 2) +
+  coord_flip() +
+  scale_x_reordered() +
+  labs(y = NULL,
+         x = NULL,
+         title = "Las 10 palabras más frecuentes de los \n programas de gobierno") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Aquí una palabra común utilizada de forma muy frecuente en todos los programas de gobierno es la de `desarrollo`, excepto por ADN quienes utilizan en su lugar la palabra `progreso`. 
+
+### 3. Comparación de frecuencias 
+
+Ahora bien, ¿cuán parecidos son los partidos políticos entre sí? Ya vimos que una de las palabras comunes es desarrollo, ¿qué hay de las demás? Podemos comparar las frecuencias de uso de las palabras entre los partidos. 
+
+```{r}
+# Antes de comparar primero cálculamos las proporciones de palabras dentro de cada programa
+prop1 <- freq %>%
+  group_by(partido) %>%
+  mutate(proporcion = n / sum(n)) %>%
+  select(-n)  %>%
+  spread(partido, proporcion)
+
+prop2 <- prop1 %>%
+  gather(partido, proporcion, c(2, 3, 4, 5, 6, 7, 9))
+```
+
+
+```{r, fig.height=10, fig.width=8, message=FALSE, warning=FALSE}
+# Ahora realizamos un gráfico de comparación de frecuencias
+library(scales)
+
+ggplot(prop2, aes(x = proporcion, y = `MAS-IPSP`, color = abs(`MAS-IPSP` - proporcion)), show.legend = FALSE) +
+  geom_abline(color = "gray40", lty = 2) +
+  geom_jitter(alpha = 0.1, size = 2.5, width = 0.3, height = 0.3) +
+  geom_text(aes(label = palabra), check_overlap = TRUE, vjust = 1.5) +
+  scale_x_log10(labels = percent_format()) +
+  scale_y_log10(labels = percent_format()) +
+  scale_color_gradient(limits = c(0, 0.001), low = "darkslategray4", high = "gray75") +
+  facet_wrap(~partido, ncol = 2) +
+  theme_linedraw() +
+  theme(legend.position="none") +
+  labs(y = "MAS-IPSP", x = NULL) 
+  
+```
+
+La forma de leer este gráfico es la siguiente: 
+
+* Las palabras que se encuentran en el sector diagonal superior en todos los paneles pertenecen al programa del MAS-IPSP, mientras las que se encuentran en la parte diagonal inferior pertenecen al programa de cada partido que está en el título del panel. 
+* Las palabras que están más cerca de la linea diagonal tienen una similar frecuencia en el par de textos comparados; aquí el color de la palabra tiene significado: entre más cercano a la linea su frecuencia es similar entre los dos programas comparados, y la palabra se pone verde; mientras si es más particular a cada programa entonces la palabra está alejada de la linea y se pone más gris.
+* Por último, la linea diagonal asciende desde las palabras menos frecuentes hacía las más frecuentes. 
+
+Entonces las palabras más comunes en cada par de programas son las palabras verdes que se encuentran en el extremo superior de la diagonal, mientras las menos comunes entre sí son las palabras grises en el extremo inferior de la diagonal; existiendo muchos valores intermedios.
+
+Para mayor claridad, demos un ejemplo. Leamos el tercer panel que es la comparación entre los programas del MAS-IPSP y CREEMOS. Las palabras `desarrollo`, `acceso`, `bien` y `gas` son palabras comunes en frecuencia en ambos programas. Mientras que `económicas` es más una palabra particular al programas del MAS y `legales` al de CREEMOS. De esta forma se pueden leer las demás comparaciones. 
+
+
+### 4. Terminos particulares
+
+Ahora veremos los terminos más particulares de cada documento en comparación con los otros documentos. Usaremos el estadístico de tf-idf^[Significa *term frequency times inverse document frequency*. Básicamente disminuye el peso de las palabras de uso común y aumenta el peso de las palabras que no se usan mucho en una colección de documentos], que mide precisamente eso: La frecuencia de un término ajustado según la particularidad con la que se usa. 
+
+```{r, message=FALSE, warning=FALSE}
+
+# Calculamos el total de las palabras en cada documento para luego ajustar la frecuencia 
+total_palabras <- freq%>%
+  group_by(partido) %>%
+  summarize(total = sum(n))
+freq <- left_join(freq, total_palabras)
+```
+
+```{r}
+# Cálculamos el tf-idf de cada termino 
+freq <- freq %>%
+  bind_tf_idf(palabra, partido, n)
+
+freq_part <- freq %>%
+  arrange(partido, desc(tf_idf)) %>%
+  mutate(palabra = factor(palabra, levels = rev(unique(palabra))))
+freq_part
+```
+
+[Descarga esta base de datos 30.910 x 7 en formato CSV]()
+
+
+```{r message=FALSE}
+# Recortamos las 10 palabras particulares más usadas
+top_part <- freq_part %>%
+  group_by(partido) %>%
+  slice(1:10) %>%
+  arrange(partido)
+top_part
+```
+
+[Descarga esta base de datos de 80 x 7 en formato CSV]()
+
+
+```{r, fig.height=4, fig.width=4, message=FALSE, warning=FALSE}
+# Visualizamos las 10 palabras más particulares
+top_part %>% 
+  ggplot(aes(x = reorder_within(palabra, tf_idf, partido), y = tf_idf, fill = partido)) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~partido, ncol = 2, scales = "free") +
+    coord_flip() +
+    scale_x_reordered() +
+    labs(y = "tf-idf",
+         x = NULL,
+         title = "Las 10 palabras más particulares de los \n programas de gobierno") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5))
+```
+
+Este gráfico nos da la perspectiva más particular de los conceptos usados en los programas de gobierno. Ahora aparecen algunos conceptos diferenciadores.
+
+## Conclusiones
+
+En temas político electorales suele existir un debate acalarado para intentar diferenciar un partido de otro. Se juegan muchas perspectivas, intereses y emociones, cuestiones más subjetivas. Aquí intentamos brindar una información más objetiva sobre los programas de gobierno, que en teoría deberían ser la base de los debates políticos y la decisión informada por parte de los ciudadanos. 
+
+En general, encontramos que hay mucho parecido entre los conceptos de todos los partidos en carrera y algunas diferencias. No obstante, las conclusiones finales las tiene el ciudadano, a partir de una observación atenta de los gráficos que le presentamos.  
+
+Por supuesto, que no sólo se puede juzgar a un partido y sus candidatos por los programas de gobierno. Es por eso que en las siguientes entregas del "Vocabulario del poder", analizaremos los discursos en Twitter de los candidatos y luego los discursos en medios de comunicacíon.
