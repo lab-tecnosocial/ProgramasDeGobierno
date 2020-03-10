@@ -1,12 +1,14 @@
 ---
 title: "El vocabulario del poder I"
-subtitle: "Análisis de contenido de los programas de gobierno de 2020"
 author: "Área de Participación Ciudadana - Lab TecnoSocial"
-output: 
+subtitle: Análisis de contenido de los programas de gobierno de 2020
+output:
   html_notebook:
-    toc: true
-    toc_float: true
     theme: flatly
+    toc: yes
+    toc_float: yes
+  word_document:
+    toc: yes
 ---
 
 ## Introducción
@@ -15,7 +17,7 @@ Esta es la primera entrega de la serie de análisis "El vocabulario del poder" r
 
 Realizaremos un análisis de contenido de los textos de los programas de gobierno. Si bien nada supera aún a una lectura atenta, contextualizada y reflexiva de los programas de gobierno, el análisis de contenido nos permitirá crear un resumen del vocabulario básico de las propuestas de los aspirantes a gobernantes, y una rápida comparación entre ellos. 
 
-Dado que siempre se puede usar la retórica en los debates políticos entre candidatos, se hace dificil saber qué es lo que realmente proponen los partidos. Nuestro método aquí es más estandarizado y cuantitativo, pero por lo mismo más objetivo,  lo que nos permite ver cuestiones a veces ocultas entre tanta estética. ¿Qué imagen de Bolivia tienen los candidatos? ¿Sus propuestas son realmente diferentes entre sí, más allá de sus estilos mediáticos personales? ¿Qué de diferente ofrecen entre sí?
+Dado que siempre se puede usar la retórica en los debates políticos entre candidatos, se hace dificil saber qué es lo que realmente proponen los partidos. Nuestro método aquí es más estandarizado y cuantitativo, pero por lo mismo más objetivo, lo que nos permite ver cuestiones a veces ocultas entre tanta estética. ¿Qué imagen de Bolivia tienen los candidatos? ¿Sus propuestas son realmente diferentes entre sí, más allá de sus estilos mediáticos personales? ¿Qué de diferente ofrece cada uno de ellos?
 
 Cabe aclarar que nos limitaremos a detallar nuestros procedimientos, ejemplificar la lectura de los mismos y hacer notar algunas tendencias generales. La lectura detallada de los gráficos y los datos, sin embargo, corresponde a los ciudadanos. Más que un trabajo de interpretación, este es un trabajo de extracción (*mining*). También ponemos a disposición la descarga de los conjuntos de datos usados. 
 
@@ -36,7 +38,7 @@ programas_df <- tibble(partido = partidos, programa = programas_texto)
 programas_df
 ```
 
-[Descarga esta base de datos de 8 x 2 en formato CSV]()
+[Descarga esta base de datos en formato CSV](./CSV/programas_df.csv)
 
 ```{r message=FALSE, warning=FALSE}
 # Tokenizamos por palabras, removemos las palabras vacías generales y específicas al corpus, y corregimos algunas cuestiones con tildes
@@ -62,7 +64,7 @@ programas_palabras <- programas_df %>%
 
 ### 1. Extensión de los programas de gobierno
 
-Una primera comparación sencilla pero ilustrativa tiene que ver con la extensión de los programas de gobierno en páginas y palabras. Se espera que un documento que detalla el gobierno de todo un país sea lo suficientemente complejo y por tanto con cierta extensión.
+Una primera comparación sencilla pero ilustrativa tiene que ver con la extensión de los programas de gobierno en páginas y palabras. Se espera que un programa de gobierno para todo un país sea lo suficientemente complejo y por tanto con cierta extensión.
 
 ```{r}
 programas_df$pag <- c(9, 56, 60, 92, 52, 48, 58, 42) 
@@ -85,14 +87,14 @@ Vemos que la media de los programas de gobierno es 54 páginas. Llama la atenci�
 Naturalmente, la cantidad de páginas no nos dicen mucho sobre el contenido en sí. Ahora vamos a extraer la frecuencia de las palabras más utilizadas.
 
 ```{r}
-# Hacemos un conteno de la frecuencia de palabras más usadas por cada partido en sus programas
+# Hacemos un conteo de la frecuencia de palabras más usadas por cada partido en sus programas
 freq <- programas_palabras %>%
   count(partido, palabra, sort = TRUE) %>%
   arrange(partido)
 freq
 ```
 
-[Descarga esta base de datos de 30.910 x 3 en formato CSV]()
+[Descarga esta base de datos de 30.910 x 3 en formato CSV](./CSV/freq.csv)
 
 ```{r message=FALSE}
 # Recortamos las 10 palabras más usadas
@@ -103,7 +105,7 @@ top <- freq %>%
 top
 ```
 
-[Descarga esta base de datos de 80 x 3 en formato CSV]()
+[Descarga esta base de datos de 80 x 3 en formato CSV](./CSV/top.csv)
 
 La anterior tabla ya nos da la información que queremos, pero sería mejor visualizarla de una forma que nos ayude a comparar las palabras más frecuentes de los distintos programas. Una opción popular aquí es el uso de *nubes de palabras*, que si bien tienen una forma atractiva, en realidad no resumen bien la información, pues (a) no se puede distinguir la magnitud de la frecuencia de palabras de una palabra frente a las otras y (b) es dificil comparar varias nubes de palabras, para nuestro caso ocho.  
 
@@ -142,7 +144,7 @@ prop2 <- prop1 %>%
 ```
 
 
-```{r, fig.height=10, fig.width=8, message=FALSE, warning=FALSE}
+```{r, fig.height=8, fig.width=6, message=FALSE, warning=FALSE}
 # Ahora realizamos un gráfico de comparación de frecuencias
 library(scales)
 
@@ -155,8 +157,8 @@ ggplot(prop2, aes(x = proporcion, y = `MAS-IPSP`, color = abs(`MAS-IPSP` - propo
   scale_color_gradient(limits = c(0, 0.001), low = "darkslategray4", high = "gray75") +
   facet_wrap(~partido, ncol = 2) +
   theme_linedraw() +
-  theme(legend.position="none") +
-  labs(y = "MAS-IPSP", x = NULL) 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) +
+  labs(title = "COMPARACIÓN DE FRECUENCIAS DE PALABRAS ENTRE PROGRAMAS DE GOBIERNO", y = "MAS-IPSP", x = NULL) 
   
 ```
 
@@ -170,8 +172,24 @@ Entonces las palabras más comunes en cada par de programas son las palabras ver
 
 Para mayor claridad, demos un ejemplo. Leamos el tercer panel que es la comparación entre los programas del MAS-IPSP y CREEMOS. Las palabras `desarrollo`, `acceso`, `bien` y `gas` son palabras comunes en frecuencia en ambos programas. Mientras que `económicas` es más una palabra particular al programas del MAS y `legales` al de CREEMOS. De esta forma se pueden leer las demás comparaciones. 
 
+### 4. Correlaciones de palabras entre programas
 
-### 4. Terminos particulares
+El anterior gráfico nos mostraba el detalle de las palabras comparadas. Ahora veamos un resumen con una medida de correlación^[Aquí utilizamo el [coeficiente phi](https://en.wikipedia.org/wiki/Phi_coefficient). Su interpretación es similar a la correlación de Pearson]. 
+
+```{r, message=F, warning=F}
+# Creamos una matriz de correlación y luego la visualizamos
+freq_cor <- freq %>%
+  pairwise_cor(partido, palabra, n, sort = TRUE)
+
+freq_cor2 <- spread(freq_cor, item2, correlation) %>%
+  rename(rowname = item1) %>%
+  column_to_rownames()
+rplot(freq_cor2, shape = 20, print_cor = T, colors = c("red", "green"), legend = F)
+```
+
+La forma de leer este gráfico es la siguiente. El coeficiente indica cuán parecidas son las palabras usadas entre dos programas, siendo 1 la máxima correlación positiva. Acá se visualizan los indices decimales. Se puede empezar de la fila superior e ir de izquierda a derecha comparando la fila seleccionado con los otros partidos y encontrando la correlación más alta. Por ejemplo, PAN-BOL tiene la relación más alta con FPV, un .7.
+
+### 5. Terminos particulares
 
 Ahora veremos los terminos más particulares de cada documento en comparación con los otros documentos. Usaremos el estadístico de tf-idf^[Significa *term frequency times inverse document frequency*. Básicamente disminuye el peso de las palabras de uso común y aumenta el peso de las palabras que no se usan mucho en una colección de documentos], que mide precisamente eso: La frecuencia de un término ajustado según la particularidad con la que se usa. 
 
@@ -195,8 +213,6 @@ freq_part <- freq %>%
 freq_part
 ```
 
-[Descarga esta base de datos 30.910 x 7 en formato CSV]()
-
 
 ```{r message=FALSE}
 # Recortamos las 10 palabras particulares más usadas
@@ -206,8 +222,6 @@ top_part <- freq_part %>%
   arrange(partido)
 top_part
 ```
-
-[Descarga esta base de datos de 80 x 7 en formato CSV]()
 
 
 ```{r, fig.height=4, fig.width=4, message=FALSE, warning=FALSE}
@@ -225,11 +239,11 @@ top_part %>%
     theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Este gráfico nos da la perspectiva más particular de los conceptos usados en los programas de gobierno. Ahora aparecen algunos conceptos diferenciadores.
+Este gráfico nos da la perspectiva más particular de los conceptos usados en los programas de gobierno. Ahora sí aparecen algunos conceptos diferenciadores.
 
 ## Conclusiones
 
-En temas político electorales suele existir un debate acalarado para intentar diferenciar un partido de otro. Se juegan muchas perspectivas, intereses y emociones, cuestiones más subjetivas. Aquí intentamos brindar una información más objetiva sobre los programas de gobierno, que en teoría deberían ser la base de los debates políticos y la decisión informada por parte de los ciudadanos. 
+En temas político-electorales suele existir un debate acalarado para intentar diferenciar un partido de otro. Se juegan muchas perspectivas, intereses y emociones, cuestiones más subjetivas. Aquí intentamos brindar una información más objetiva sobre los programas de gobierno, que en teoría deberían ser la base de los debates políticos y la decisión informada por parte de los ciudadanos. 
 
 En general, encontramos que hay mucho parecido entre los conceptos de todos los partidos en carrera y algunas diferencias. No obstante, las conclusiones finales las tiene el ciudadano, a partir de una observación atenta de los gráficos que le presentamos.  
 
