@@ -1,25 +1,23 @@
 ---
 title: "El vocabulario del poder I"
+subtitle: "Análisis de contenido de los programas de gobierno de 2020"
 author: "Área de Participación Ciudadana - Lab TecnoSocial"
-subtitle: Análisis de contenido de los programas de gobierno de 2020
 output:
   html_notebook:
     theme: flatly
     toc: yes
     toc_float: yes
-  word_document:
-    toc: yes
 ---
 
 ## Introducción
 
-Esta es la primera entrega de la serie de análisis "El vocabulario del poder" realizado por el area de Participación Ciudadana del Laboratorio de Redes y Tecnologías Sociales ([Lab TecnoSocial](http://labtecnosocial.org/)). El objetivo de este primer análisis es develar las palabras clave de las programas de gobierno que conforman la visión de mundo y propuesta de los partidos. 
+Esta es la primera entrega de la serie de análisis "El vocabulario del poder" realizado por el área de Participación Ciudadana del Laboratorio de Redes y Tecnologías Sociales ([Lab TecnoSocial](http://labtecnosocial.org/)). El objetivo de este primer análisis es develar las palabras clave de las programas de gobierno que conforman la visión de mundo y propuesta de los partidos. 
 
 Realizaremos un análisis de contenido de los textos de los programas de gobierno. Si bien nada supera aún a una lectura atenta, contextualizada y reflexiva de los programas de gobierno, el análisis de contenido nos permitirá crear un resumen del vocabulario básico de las propuestas de los aspirantes a gobernantes, y una rápida comparación entre ellos. 
 
-Dado que siempre se puede usar la retórica en los debates políticos entre candidatos, se hace dificil saber qué es lo que realmente proponen los partidos. Nuestro método aquí es más estandarizado y cuantitativo, pero por lo mismo más objetivo, lo que nos permite ver cuestiones a veces ocultas entre tanta estética. ¿Qué imagen de Bolivia tienen los candidatos? ¿Sus propuestas son realmente diferentes entre sí, más allá de sus estilos mediáticos personales? ¿Qué de diferente ofrece cada uno de ellos?
+Dado que siempre se puede usar la retórica en los debates políticos entre candidatos, se hace difícil saber qué es lo que realmente proponen los partidos. Nuestro método aquí es más estandarizado y cuantitativo, pero por lo mismo más objetivo, lo que nos permite ver cuestiones a veces ocultas entre tanto espectáculo. ¿Qué imagen de Bolivia tienen los candidatos? ¿Sus propuestas son realmente diferentes entre sí, más allá de sus estilos mediáticos personales?
 
-Cabe aclarar que nos limitaremos a detallar nuestros procedimientos, ejemplificar la lectura de los mismos y hacer notar algunas tendencias generales. La lectura detallada de los gráficos y los datos, sin embargo, corresponde a los ciudadanos. Más que un trabajo de interpretación, este es un trabajo de extracción (*mining*). También ponemos a disposición la descarga de los conjuntos de datos usados. 
+Cabe aclarar que aquí nos limitaremos a detallar nuestros procedimientos, ejemplificar la lectura de los mismos y hacer notar algunas tendencias generales. La lectura detallada de los gráficos y los datos, sin embargo, corresponde a los ciudadanos. Más que un trabajo de interpretación, este es un trabajo de extracción (*mining*). También ponemos a disposición la descarga de los conjuntos de datos usados. 
 
 ## Preparación de los datos
 
@@ -64,7 +62,7 @@ programas_palabras <- programas_df %>%
 
 ### 1. Extensión de los programas de gobierno
 
-Una primera comparación sencilla pero ilustrativa tiene que ver con la extensión de los programas de gobierno en páginas y palabras. Se espera que un programa de gobierno para todo un país sea lo suficientemente complejo y por tanto con cierta extensión.
+Una primera comparación sencilla pero ilustrativa que haremos será sobre la extensión de los programas de gobierno. Se espera que un programa de gobierno para todo un país sea lo suficientemente complejo y por tanto tenga una buena extensión.
 
 ```{r}
 programas_df$pag <- c(9, 56, 60, 92, 52, 48, 58, 42) 
@@ -80,7 +78,7 @@ median(programas_df$pag)
 
 ```
 
-Vemos que la media de los programas de gobierno es 54 páginas. Llama la atención la extensión tan minima de ADN y la mayor ampulosidad del programa del FPV, donde se ha detectado [plagio](https://www.lostiempos.com/actualidad/pais/20200210/fpv-presenta-nuevamente-programa-gobierno-plagiado-partido-peruano).
+Vemos que la media de los programas de gobierno es 54 páginas. Llama la atención la extensión tan mínima de ADN y la mayor ampulosidad del programa del FPV, del cual se ha detectado [plagio](https://www.lostiempos.com/actualidad/pais/20200210/fpv-presenta-nuevamente-programa-gobierno-plagiado-partido-peruano).
 
 ### 2. Frecuencia de palabras
 
@@ -107,7 +105,7 @@ top
 
 [Descarga esta base de datos de 80 x 3 en formato CSV](./CSV/top.csv)
 
-La anterior tabla ya nos da la información que queremos, pero sería mejor visualizarla de una forma que nos ayude a comparar las palabras más frecuentes de los distintos programas. Una opción popular aquí es el uso de *nubes de palabras*, que si bien tienen una forma atractiva, en realidad no resumen bien la información, pues (a) no se puede distinguir la magnitud de la frecuencia de palabras de una palabra frente a las otras y (b) es dificil comparar varias nubes de palabras, para nuestro caso ocho.  
+La anterior tabla ya nos da la información que queremos, pero necesitamos una visualización que nos ayude a comparar las palabras más frecuentes de los distintos programas. Una opción popular aquí es el uso de *nubes de palabras*, que si bien tienen una forma atractiva, en realidad no resumen bien la información, pues en ellas (a) no se puede distinguir la magnitud de la frecuencia de palabras de una palabra frente a las otras y (b) es difícil comparar varias nubes de palabras de diferentes casos. 
 
 En su lugar usaremos un diagrama de barras que es más preciso y comparable.
 
@@ -129,7 +127,7 @@ Aquí una palabra común utilizada de forma muy frecuente en todos los programas
 
 ### 3. Comparación de frecuencias 
 
-Ahora bien, ¿cuán parecidos son los partidos políticos entre sí? Ya vimos que una de las palabras comunes es desarrollo, ¿qué hay de las demás? Podemos comparar las frecuencias de uso de las palabras entre los partidos. 
+Ahora bien, ¿cuán parecidos son los partidos políticos entre sí? Ya vimos que una de las palabras comunes es desarrollo, ¿qué hay de las demás palabras? Podemos comparar las frecuencias de uso de las palabras entre los partidos. 
 
 ```{r}
 # Antes de comparar primero cálculamos las proporciones de palabras dentro de cada programa
@@ -168,30 +166,34 @@ La forma de leer este gráfico es la siguiente:
 * Las palabras que están más cerca de la linea diagonal tienen una similar frecuencia en el par de textos comparados; aquí el color de la palabra tiene significado: entre más cercano a la linea su frecuencia es similar entre los dos programas comparados, y la palabra se pone verde; mientras si es más particular a cada programa entonces la palabra está alejada de la linea y se pone más gris.
 * Por último, la linea diagonal asciende desde las palabras menos frecuentes hacía las más frecuentes. 
 
-Entonces las palabras más comunes en cada par de programas son las palabras verdes que se encuentran en el extremo superior de la diagonal, mientras las menos comunes entre sí son las palabras grises en el extremo inferior de la diagonal; existiendo muchos valores intermedios.
+Entonces las palabras más comunes en cada par de programas son las palabras verdes que se encuentran en el extremo superior de la diagonal, mientras las menos comunes entre sí son las palabras grises en el extremo inferior de la diagonal, existiendo muchos valores intermedios.
 
-Para mayor claridad, demos un ejemplo. Leamos el tercer panel que es la comparación entre los programas del MAS-IPSP y CREEMOS. Las palabras `desarrollo`, `acceso`, `bien` y `gas` son palabras comunes en frecuencia en ambos programas. Mientras que `económicas` es más una palabra particular al programas del MAS y `legales` al de CREEMOS. De esta forma se pueden leer las demás comparaciones. 
+Para mayor claridad, demos un ejemplo. Leamos el tercer panel que es la comparación entre los programas del MAS-IPSP y CREEMOS. Las palabras `desarrollo`, `acceso`, `bien` y `gas` son palabras comunes en frecuencia en ambos programas. Mientras que `económicas` es más una palabra particular al programas del MAS y `legales` a de CREEMOS. De esta forma se pueden leer las demás comparaciones. 
 
 ### 4. Correlaciones de palabras entre programas
 
-El anterior gráfico nos mostraba el detalle de las palabras comparadas. Ahora veamos un resumen con una medida de correlación^[Aquí utilizamo el [coeficiente phi](https://en.wikipedia.org/wiki/Phi_coefficient). Su interpretación es similar a la correlación de Pearson]. 
+El anterior gráfico nos mostraba el detalle de las palabras comparadas. Ahora veamos un resumen con una medida de correlación^[Aquí utilizamos el [coeficiente phi](https://en.wikipedia.org/wiki/Phi_coefficient). Su interpretación es similar a la correlación de Pearson]. 
 
 ```{r, message=F, warning=F}
 # Creamos una matriz de correlación y luego la visualizamos
+library(widyr)
 freq_cor <- freq %>%
   pairwise_cor(partido, palabra, n, sort = TRUE)
 
 freq_cor2 <- spread(freq_cor, item2, correlation) %>%
   rename(rowname = item1) %>%
   column_to_rownames()
-rplot(freq_cor2, shape = 20, print_cor = T, colors = c("red", "green"), legend = F)
+rplot(freq_cor2, shape = 20, print_cor = T, colors = c("red", "green"), legend = F) +
+  labs(title = "Correlaciones de palabras entre programas de gobierno") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
 ```
 
-La forma de leer este gráfico es la siguiente. El coeficiente indica cuán parecidas son las palabras usadas entre dos programas, siendo 1 la máxima correlación positiva. Acá se visualizan los indices decimales. Se puede empezar de la fila superior e ir de izquierda a derecha comparando la fila seleccionado con los otros partidos y encontrando la correlación más alta. Por ejemplo, PAN-BOL tiene la relación más alta con FPV, un .7.
+La forma de leer este gráfico es la siguiente. El coeficiente indica cuán parecidas son las palabras usadas entre dos programas de 0 a 1, siendo 1 la máxima correlación positiva. Se puede empezar de la fila superior e ir de izquierda a derecha comparando la fila seleccionado con los otros partidos y encontrando la correlación más alta. Por ejemplo, PAN-BOL tiene la correlación más alta con FPV, un .7.
 
-### 5. Terminos particulares
+### 5. Términos particulares
 
-Ahora veremos los terminos más particulares de cada documento en comparación con los otros documentos. Usaremos el estadístico de tf-idf^[Significa *term frequency times inverse document frequency*. Básicamente disminuye el peso de las palabras de uso común y aumenta el peso de las palabras que no se usan mucho en una colección de documentos], que mide precisamente eso: La frecuencia de un término ajustado según la particularidad con la que se usa. 
+Ahora veremos los términos más particulares de cada documento en comparación con los otros documentos. Usaremos el estadístico de tf-idf^[Significa *term frequency times inverse document frequency*. Básicamente disminuye el peso de las palabras de uso común y aumenta el peso de las palabras que no se usan mucho en una colección de documentos], que mide precisamente eso: La frecuencia de un término ajustado según la particularidad con la que se usa. 
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -239,7 +241,7 @@ top_part %>%
     theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Este gráfico nos da la perspectiva más particular de los conceptos usados en los programas de gobierno. Ahora sí aparecen algunos conceptos diferenciadores.
+Este gráfico nos da la perspectiva más particular de los conceptos usados en los programas de gobierno. Ahora sí aparecen algunos terminos diferenciadores.
 
 ## Conclusiones
 
@@ -247,4 +249,4 @@ En temas político-electorales suele existir un debate acalarado para intentar d
 
 En general, encontramos que hay mucho parecido entre los conceptos de todos los partidos en carrera y algunas diferencias. No obstante, las conclusiones finales las tiene el ciudadano, a partir de una observación atenta de los gráficos que le presentamos.  
 
-Por supuesto, que no sólo se puede juzgar a un partido y sus candidatos por los programas de gobierno. Es por eso que en las siguientes entregas del "Vocabulario del poder", analizaremos los discursos en Twitter de los candidatos y luego los discursos en medios de comunicacíon.
+Por supuesto, que no sólo se debe juzgar a un partido y sus candidatos por los programas de gobierno. Es por eso que en las siguientes entregas del "Vocabulario del poder", analizaremos los discursos en Twitter de los candidatos y luego los discursos en medios de comunicación.
